@@ -2,12 +2,38 @@ const Booking = require("../models/Booking");
 
 const getAllBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find().sort({ booked_at: -1 });
-    res.json(bookings);
+    const filter = buildFilter(req.query);
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
+    const skip = (page - 1) * limit;
+
+    console.log("req.query =", req.query);
+    console.log("filter =", filter);
+
+    const bookings = await Booking.find(filter)
+    .sort(req.query.sort || "-createdAt")
+    .skip(skip)
+    .limit(limit);
+
+    const totalItems = await Booking.countDocuments(filter);
+    const totalPages = Math.ceil(totalItems / limit);
+    res.json({
+    currentPage: page,
+    itemsPerPage: limit,
+    totalItems,
+    totalPages,
+    bookings
+});
+
   } catch (err) {
-    res.status(400).json({ status: "error", message: err.message });
+    res.status(400).json({
+      status: "error",
+      message: err.message
+    });
   }
 };
+
+
 
 const createBooking = async (req, res) => {
   try {
@@ -95,6 +121,37 @@ const updateBooking = async (req, res) => {
   }
 };
 
+function buildFilter(query) {
+    const filtered = {};
+
+    for (let key in query) {
+        if (key === "page" || key === "limit" || key === "sort") {
+    continue;
+}
+        const value = query[key];
+
+        const match = key.match(/^(.+)\[(gte|gt|lte|lt)]$/);
+
+        if (match) {
+            const field = match[1];
+            const operator = `$${match[2]}`;
+
+            if (!filtered[field]) {
+                filtered[field] = {};
+            }
+
+            filtered[field][operator] = Number(value);
+
+        } else {
+            filtered[key] = {
+                $regex: value,
+                $options: "i"
+            };
+        }
+    }
+
+    return filtered;
+};
 
 
 module.exports = {
