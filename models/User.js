@@ -2,12 +2,12 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-   name: {
-    type: String,
-    required: true,
-    trim: true,
-    match: [/^[A-Za-z\s]+$/, "Name must contain only letters"]
-},
+    name: {
+      type: String,
+      required: true,
+      trim: true,
+      match: [/^[A-Za-z\s]+$/, "Name must contain only letters"]
+    },
 
     email: {
       type: String,
@@ -23,10 +23,10 @@ const userSchema = new mongoose.Schema(
     },
 
     phone: {
-    type: String,
-    required: true,
-    match: [/^01[0125][0-9]{8}$/, "Please enter a valid Egyptian phone number"]
-},
+      type: String,
+      required: true,
+      match: [/^01[0125][0-9]{8}$/, "Please enter a valid phone number"]
+    },
 
     role: {
       type: String,
@@ -35,7 +35,16 @@ const userSchema = new mongoose.Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    toJSON: {
+      virtuals: true,
+      transform: (doc, ret) => {
+        delete ret._id;
+        delete ret.__v;
+        delete ret.password;
+        return ret;
+      }
+    }
   }
 );
 

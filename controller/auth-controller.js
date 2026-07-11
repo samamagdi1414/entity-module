@@ -1,6 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
+const generateToken = require("../utils/get-jwt");
 
 const signup = async (req, res) => {
     try {
@@ -26,16 +26,7 @@ const signup = async (req, res) => {
             role
         });
 
-        const token = jwt.sign(
-    {
-        id: user._id,
-        role: user.role
-    },
-    process.env.JWT_SECRET,
-    {
-        expiresIn: process.env.JWT_EXPIRES_IN
-    }
-);
+        const token = generateToken(user);
 res.status(201).json({
     status: "success",
     token,
@@ -75,16 +66,7 @@ if (!isMatch) {
     });
 };
 
-const token = jwt.sign(
-    {
-        id: user._id,
-        role: user.role
-    },
-    process.env.JWT_SECRET,
-    {
-        expiresIn: process.env.JWT_EXPIRES_IN
-    }
-);
+const token = generateToken(user);
 res.json({
     status: "success",
     token,

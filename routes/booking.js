@@ -1,17 +1,20 @@
 const bookingController = require("../controller/booking-controller");
+const authenticate = require("../middleware/authentication-middleware");
+const restrictTo = require("../middleware/authorization-middlleware");
+
 
 const express = require("express");
 const router = express.Router();
 
 router
   .route("/")
-  .get(bookingController.getAllBookings)
+  .get(authenticate,restrictTo("admin"),bookingController.getAllBookings)
   .post(bookingController.createBooking);
 
 router
   .route("/:id")
-  .get(bookingController.getBookingById)
-  .patch(bookingController.updateBooking)
-  .delete(bookingController.deleteBooking);
+  .get(authenticate,restrictTo("admin"),bookingController.getBookingById)
+  .patch(authenticate,restrictTo("admin"),bookingController.updateBooking)
+  .delete(authenticate,restrictTo("admin"),bookingController.deleteBooking);
 
 module.exports = router;

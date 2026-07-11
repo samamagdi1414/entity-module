@@ -7,9 +7,6 @@ const getAllBookings = async (req, res) => {
     const limit = Number(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
-    console.log("req.query =", req.query);
-    console.log("filter =", filter);
-
     const bookings = await Booking.find(filter)
     .sort(req.query.sort || "-createdAt")
     .skip(skip)
@@ -33,8 +30,6 @@ const getAllBookings = async (req, res) => {
   }
 };
 
-
-
 const createBooking = async (req, res) => {
   try {
     const { name, email, movie, seats, adults, kids, total } = req.body;
@@ -49,11 +44,11 @@ const createBooking = async (req, res) => {
       total: total || 0
     });
 
-    res.json({ 
+    res.json({
         status: "success" });
   } catch (err) {
-    res.status(400).json({ 
-        status: "error", 
+    res.status(400).json({
+        status: "error",
         message: err.message });
   }
 };
@@ -121,6 +116,8 @@ const updateBooking = async (req, res) => {
   }
 };
 
+const TEXT_FIELDS = ["name", "email", "movie", "seats"];
+
 function buildFilter(query) {
     const filtered = {};
 
@@ -142,11 +139,13 @@ function buildFilter(query) {
 
             filtered[field][operator] = Number(value);
 
-        } else {
+        } else if (TEXT_FIELDS.includes(key)) {
             filtered[key] = {
                 $regex: value,
                 $options: "i"
             };
+        } else {
+            filtered[key] = Number(value);
         }
     }
 
