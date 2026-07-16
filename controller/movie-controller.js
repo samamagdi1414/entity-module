@@ -36,7 +36,7 @@ const createMovie = async (req, res) => {
       duration,
       image_url,
       status: status || "now_showing",
-      is_featured: !!is_featured
+      is_featured: is_featured === 'true' || is_featured === true
     });
 
     res.json({ status: "success", id: newMovie.id });
@@ -78,7 +78,7 @@ const updateMovie = async (req, res) => {
 
     const movie = await Movie.findByIdAndUpdate(
       req.params.id,
-      { title, description, rating, genre, duration, image_url, status, is_featured: !!is_featured },
+      { title, description, rating, genre, duration, image_url, status, is_featured: is_featured === 'true' || is_featured === true },
       { new: true, runValidators: true }
     );
 

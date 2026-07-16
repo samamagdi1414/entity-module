@@ -1,0 +1,8 @@
+admin
+"status": "success",
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTI1ZjVhNDJhYzc3NDc3YzYxOTJhYiIsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc4NDA0MTg3MywiZXhwIjoxNzg0MjE0NjczfQ.rzDkBvoc9Bu2XrlmFOmzg6AhCiaWB11iFmE_wKoP1F4",
+    "user": {
+        "id": "6a525f5a42ac77477c6192ab",
+        "name": "Admin User",
+        "email": "admin@cinema.com",
+        "role": "admin"

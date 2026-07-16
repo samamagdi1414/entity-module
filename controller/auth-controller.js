@@ -1,43 +1,47 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const generateToken = require("../utils/get-jwt");
-
+ 
 const signup = async (req, res) => {
     try {
-
-        const { name, email, password, phone, role } = req.body;
-
+ 
+        const { name, email, password, phone } = req.body;
+        // role is intentionally NOT taken from req.body — public signup can only
+        // ever create a "customer". Admin accounts are created separately, by
+        // an existing admin, via PATCH /api/users/:id/role.
+ 
         const existingUser = await User.findOne({ email });
-
+ 
         if (existingUser) {
             return res.status(400).json({
                 status: "error",
                 message: "Email already exists"
             });
         }
-
+ 
         const hashedPassword = await bcrypt.hash(password, 10);
-
+ 
         const user = await User.create({
             name,
             email,
             password: hashedPassword,
             phone,
-            role
+            role: "customer"
         });
-
+ 
         const token = generateToken(user);
-res.status(201).json({
-    status: "success",
-    token,
-    user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-    }
-});
-
+ 
+        res.status(201).json({
+            status: "success",
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+ 
     } catch (err) {
         res.status(400).json({
             status: "error",
@@ -45,39 +49,40 @@ res.status(201).json({
         });
     }
 };
-
+ 
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
         if (!user) {
-    return res.status(400).json({
-        status: "error",
-        message: "Invalid email or password"
-    });
-};
-
-const isMatch = await bcrypt.compare(password, user.password);
-
-if (!isMatch) {
-    return res.status(400).json({
-        status: "error",
-        message: "Invalid email or password"
-    });
-};
-
-const token = generateToken(user);
-res.json({
-    status: "success",
-    token,
-    user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-    }
-});
-
+            return res.status(400).json({
+                status: "error",
+                message: "Invalid email or password"
+            });
+        }
+ 
+        const isMatch = await bcrypt.compare(password, user.password);
+ 
+        if (!isMatch) {
+            return res.status(400).json({
+                status: "error",
+                message: "Invalid email or password"
+            });
+        }
+ 
+        const token = generateToken(user);
+ 
+        res.json({
+            status: "success",
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+ 
     } catch (err) {
         res.status(400).json({
             status: "error",
@@ -85,7 +90,7 @@ res.json({
         });
     }
 };
-
+ 
 const profile = async (req, res) => {
     res.json({
         status: "success",
@@ -98,5 +103,12 @@ const profile = async (req, res) => {
         }
     });
 };
-
-module.exports = {signup, login, profile};
+ 
+const logout = async (req, res) => {
+    res.json({
+        status: "success",
+        message: "Logged out successfully"
+    });
+};
+ 
+module.exports = {signup, login, profile, logout};
